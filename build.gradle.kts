@@ -16,7 +16,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-	implementation("com.h2database:h2:2.1.214")
+	implementation("org.postgresql:postgresql:42.5.4")
+	//implementation("com.h2database:h2:2.1.214")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

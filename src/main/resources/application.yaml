@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:mydb
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
+    url: jdbc:postgresql://geocoder-postgres:5432/geocoder
+    username: geocoder
+    password: geocoder
+    driverClassName: org.postgresql.Driver
   jpa:
-    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    spring.jpa.database-platform: org.hibernate.dialect.PostrgreSQLDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update

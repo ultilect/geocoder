@@ -1,0 +1,44 @@
+version: '3'
+
+networks:
+  overlay:
+
+volumes:
+  pg_data:
+
+services:
+  application:
+    image: geocoder:latest
+    container_name: geocoder
+    restart: unless-stopped
+    ports:
+      - '80:8080'
+    networks:
+      - overlay
+
+  database:
+    image: postgres:15
+    container_name: geocoder-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=geocoder
+      - POSTGRES_USER=geocoder
+      - POSTGRES_PASSWORD=geocoder
+    ports:
+      - '5432:5432'
+    networks:
+      - overlay
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - '15432:80'
+    networks:
+      - overlay
