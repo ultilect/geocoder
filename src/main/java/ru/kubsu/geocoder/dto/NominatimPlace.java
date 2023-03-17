@@ -61,8 +61,8 @@ public class NominatimPlace {
     @Override
     public String toString() {
         return "NominatimPlace{" +
-                "lat='" + latitude + '\'' +
-                ", lon='" + longitude + '\'' +
+                "latitude=" + latitude +
+                ", longitude=" + longitude +
                 ", displayName='" + displayName + '\'' +
                 ", type='" + type + '\'' +
                 '}';
