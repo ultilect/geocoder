@@ -105,9 +105,9 @@ class TestControllerTest {
            fail("Body is null");
        }
 
-       assertEquals("/tests/check/str", body.getPath());
-       assertEquals("Bad Request", body.getError());
-       assertEquals(400, body.getStatus());
+       assertEquals("/tests/check/str", body.path());
+       assertEquals("Bad Request", body.error());
+       assertEquals(400, body.status());
     }
 
     @Test
