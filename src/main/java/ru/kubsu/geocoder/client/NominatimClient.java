@@ -45,4 +45,11 @@ public interface NominatimClient {
                            @RequestParam("lon") String longitude,
                            @RequestParam(value = "format", defaultValue = "json") String format);
 
+    default Optional<NominatimPlace> reverse(final String latitude, final String longitude) {
+        try {
+            return Optional.of(reverse(latitude, longitude, JSON_FORMAT));
+        } catch (Exception ex) {
+            return Optional.empty();
+        }
+    }
 }
