@@ -20,7 +20,7 @@ public class Address {
     private String address;
     private Double latitude;
     private Double longitude;
-
+    private String query;
     public Integer getId() {
         return id;
     }
@@ -53,40 +53,50 @@ public class Address {
         this.longitude = longitude;
     }
 
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(final String query) {
+        this.query = query;
+    }
+
     @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) {
+    public boolean equals(final Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null || obj.getClass() != this.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Address that = (Address) obj;
-        return //Objects.equals(this.id, that.id)&&
-                Objects.equals(this.address, that.address)
-                && Objects.equals(this.latitude, that.latitude)
-                && Objects.equals(this.longitude, that.longitude);
+        final Address address1 = (Address) o;
+        return Objects.equals(id, address1.id) && Objects.equals(address, address1.address)
+                && Objects.equals(latitude, address1.latitude) && Objects.equals(longitude, address1.longitude)
+                && Objects.equals(query, address1.query);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, address, latitude, longitude);
+        return Objects.hash(id, address, latitude, longitude, query);
     }
 
     @Override
     public String toString() {
-        return "Address["
-                + "id=" + id + ", "
-                + "address=" + address + ", "
-                + "latitude=" + latitude + ", "
-                + "longitude=" + longitude + ']';
+        return "Address{"
+                + "id=" + id
+                + ", address='" + address + '\''
+                + ", latitude=" + latitude
+                + ", longitude=" + longitude
+                + ", query='" + query + '\''
+                + '}';
     }
 
-    public static Address of(final NominatimPlace place) {
+    public static Address of(final NominatimPlace place, final String query) {
         final Address result = new Address();
         result.setAddress(place.displayName());
         result.setLatitude(place.latitude());
         result.setLongitude(place.longitude());
+        result.setQuery(query);
         return result;
     }
 }

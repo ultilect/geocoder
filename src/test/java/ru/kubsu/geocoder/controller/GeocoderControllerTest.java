@@ -44,25 +44,31 @@ class GeocoderControllerTest {
     }
     @Test
     void search() {
-        final Address testPlace = buildTestAddress();
+        final String query = "кубгу";
+        final Address testPlace = buildTestAddress(query);
         //TODO: исправить buildTestPlace() на реальные данные
         when(nominatimClient.search(anyString())).thenReturn(Optional.of(buildTestPlace()));
 
         ResponseEntity<Address> response =
                 testRestTemplate.getForEntity("http://localhost:"+
-                        this.port+"/geocoder/search?q=кубгу",Address.class);
+                        this.port+"/geocoder/search?q=" + query,Address.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         final Address body = response.getBody();
-        assertEquals(testPlace, body);
+        assertEquals(testPlace.getQuery(),body.getQuery());
+        assertEquals(testPlace.getAddress(),body.getAddress());
+        assertEquals(testPlace.getLongitude(),body.getLongitude());
+        assertEquals(testPlace.getLatitude(),body.getLatitude());
     }
 
     @Test
     void searchWhenNominatimNotResponse() {
+        final String query = "кубгу";
+        final Address testPlace = buildTestAddress(query);
         when(nominatimClient.search(anyString())).thenReturn(Optional.empty());
 
         ResponseEntity<NominatimPlace> response =
                 testRestTemplate.getForEntity("http://localhost:"+
-                        this.port+"/geocoder/search?q=кубгу",NominatimPlace.class);
+                        this.port+"/geocoder/search?q=" + query,NominatimPlace.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
    }
@@ -70,7 +76,7 @@ class GeocoderControllerTest {
    private static NominatimPlace buildTestPlace() {
         return new NominatimPlace();
    }
-    private static Address buildTestAddress() {
-        return Address.of(buildTestPlace());
+    private static Address buildTestAddress(final String query) {
+        return Address.of(buildTestPlace(), query);
     }
 }

@@ -24,10 +24,10 @@ public class AddressService {
         this.addressRepository = addressRepository;
     }
 
-    public Optional<Address> search(final String address) {
-        return addressRepository.findByAddress(address)
-                .or(() -> nominatimClient.search(address)
-                        .map(place -> addressRepository.save(Address.of(place)))
+    public Optional<Address> search(final String query) {
+        return addressRepository.findByQuery(query)
+                .or(() -> nominatimClient.search(query)
+                        .map(place -> addressRepository.save(Address.of(place, query)))
                 );
     }
 

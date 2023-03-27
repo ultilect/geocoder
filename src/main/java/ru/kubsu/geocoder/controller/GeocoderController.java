@@ -25,8 +25,8 @@ public class GeocoderController {
     }
 
     @GetMapping(value = "/search", produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<Address> search(final @RequestParam("q") String address) {
-        return addressService.search(address)
+    public ResponseEntity<Address> search(final @RequestParam("q") String query) {
+        return addressService.search(query)
                 .map(place -> ResponseEntity.status(HttpStatus.OK).body(place))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
