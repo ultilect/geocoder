@@ -1,5 +1,6 @@
 package ru.kubsu.geocoder.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.kubsu.geocoder.client.NominatimClient;
 import ru.kubsu.geocoder.dto.NominatimPlace;
+import ru.kubsu.geocoder.model.Address;
+import ru.kubsu.geocoder.repository.AddressRepository;
 import ru.kubsu.geocoder.repository.TestRepository;
 
 import java.util.Optional;
@@ -30,21 +33,27 @@ class GeocoderControllerTest {
     private NominatimClient nominatimClient;
     @Autowired
     private TestRepository testRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
     private final TestRestTemplate testRestTemplate = new TestRestTemplate();
 
-    //TODO Tests
+    @BeforeEach
+    void setUp() {
+       addressRepository.deleteAll();
+    }
     @Test
     void search() {
-        final NominatimPlace testPlace = buildTestPlace();
-        when(nominatimClient.search(anyString())).thenReturn(Optional.of(testPlace));
+        final Address testPlace = buildTestAddress();
+        //TODO: исправить buildTestPlace() на реальные данные
+        when(nominatimClient.search(anyString())).thenReturn(Optional.of(buildTestPlace()));
 
-        ResponseEntity<NominatimPlace> response =
+        ResponseEntity<Address> response =
                 testRestTemplate.getForEntity("http://localhost:"+
-                        this.port+"/geocoder/search?q=кубгу",NominatimPlace.class);
+                        this.port+"/geocoder/search?q=кубгу",Address.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
-       final NominatimPlace body = response.getBody();
-       assertEquals(testPlace, body);
+        final Address body = response.getBody();
+        assertEquals(testPlace, body);
     }
 
     @Test
@@ -61,4 +70,7 @@ class GeocoderControllerTest {
    private static NominatimPlace buildTestPlace() {
         return new NominatimPlace();
    }
+    private static Address buildTestAddress() {
+        return Address.of(buildTestPlace());
+    }
 }
