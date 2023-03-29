@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.kubsu.geocoder.model.Test;
 import ru.kubsu.geocoder.service.TestService;
 
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**

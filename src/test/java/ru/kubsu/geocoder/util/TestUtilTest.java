@@ -1,9 +1,8 @@
 package ru.kubsu.geocoder.util;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class TestUtilTest {
 

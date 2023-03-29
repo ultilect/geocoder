@@ -32,11 +32,11 @@ public class GeocoderController {
 
     }
 
-    //@GetMapping(value = "/reverse", produces = APPLICATION_JSON_VALUE)
-    //public ResponseEntity<NominatimPlace> reverse(final @RequestParam("lat") String latitude,
-    //                                              final @RequestParam("lot") String longitude) {
-    //    return nominatimClient.reverse(latitude, longitude)
-    //            .map(place -> ResponseEntity.status(HttpStatus.OK).body(place))
-    //            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    //}
+    @GetMapping(value = "/reverse", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<Address> reverse(final @RequestParam("lat") String latitude,
+                                                  final @RequestParam("lon") String longitude) {
+        return addressService.reverse(latitude, longitude)
+                .map(place -> ResponseEntity.status(HttpStatus.OK).body(place))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
 }

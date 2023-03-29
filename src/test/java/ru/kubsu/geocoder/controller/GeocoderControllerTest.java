@@ -18,6 +18,7 @@ import ru.kubsu.geocoder.repository.AddressRepository;
 import ru.kubsu.geocoder.repository.TestRepository;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,7 +47,6 @@ class GeocoderControllerTest {
     void search() {
         final String query = "кубгу";
         final Address testPlace = buildTestAddress(query);
-        //TODO: исправить buildTestPlace() на реальные данные
         when(nominatimClient.search(anyString())).thenReturn(Optional.of(buildTestPlace()));
 
         ResponseEntity<Address> response =
@@ -54,10 +54,50 @@ class GeocoderControllerTest {
                         this.port+"/geocoder/search?q=" + query,Address.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         final Address body = response.getBody();
+        if(body == null) {
+            fail("Body is null");
+        }
         assertEquals(testPlace.getQuery(),body.getQuery());
         assertEquals(testPlace.getAddress(),body.getAddress());
         assertEquals(testPlace.getLongitude(),body.getLongitude());
         assertEquals(testPlace.getLatitude(),body.getLatitude());
+    }
+
+    @Test
+    void searchCheckCache() {
+        final String query = "кубгу";
+        when(nominatimClient.search(anyString())).thenReturn(Optional.of(buildTestPlace()));
+
+        ResponseEntity<Address> response1 =
+                testRestTemplate.getForEntity("http://localhost:"+
+                        this.port+"/geocoder/search?q=" + query,Address.class);
+        assertEquals(HttpStatus.OK, response1.getStatusCode());
+
+        Address body1 = response1.getBody();
+        if(body1 == null) {
+            fail("Body is null");
+        }
+
+        AtomicReference<Integer> amountRecords = new AtomicReference<>(0);
+        addressRepository.findAll()
+                .forEach(place -> amountRecords .getAndSet(amountRecords .get() + 1));
+        assertEquals(1, amountRecords.get());
+
+        ResponseEntity<Address> response2 =
+                testRestTemplate.getForEntity("http://localhost:"+
+                        this.port+"/geocoder/search?q=" + query,Address.class);
+        assertEquals(HttpStatus.OK, response1.getStatusCode());
+
+        Address body2 = response2.getBody();
+        if(body2 == null) {
+            fail("Body is null");
+        }
+        assertEquals(body1, body2);
+
+        AtomicReference<Integer> amountRecords2 = new AtomicReference<>(0);
+        addressRepository.findAll()
+                .forEach(place -> amountRecords2 .getAndSet(amountRecords2 .get() + 1));
+        assertEquals(1, amountRecords2.get());
     }
 
     @Test
@@ -71,6 +111,75 @@ class GeocoderControllerTest {
                         this.port+"/geocoder/search?q=" + query,NominatimPlace.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
+   }
+
+   @Test
+   void reverse() {
+       final String query = null;
+       final Address testPlace = buildTestAddress(query);
+       when(nominatimClient.reverse(anyString(), anyString())).thenReturn(Optional.of(buildTestPlace()));
+
+       ResponseEntity<Address> response =
+               testRestTemplate.getForEntity("http://localhost:" +
+                       this.port + "/geocoder/reverse?lat=10.5&lon=11", Address.class);
+
+       assertEquals(HttpStatus.OK, response.getStatusCode());
+       final Address body = response.getBody();
+
+       if(body == null) {
+           fail("Body is null");
+       }
+
+       assertEquals(testPlace.getLatitude(), body.getLatitude());
+       assertEquals(testPlace.getLongitude(), body.getLongitude());
+       assertEquals(testPlace.getAddress(), body.getAddress());
+       assertNull(body.getQuery());
+   }
+
+   @Test
+   void reverseCheckCache() {
+       when(nominatimClient.reverse(anyString(), anyString())).thenReturn(Optional.of(buildTestPlace()));
+       ResponseEntity<Address> response1 =
+               testRestTemplate.getForEntity("http://localhost:" +
+                       this.port + "/geocoder/reverse?lat=10.5&lon=11", Address.class);
+       assertEquals(HttpStatus.OK, response1.getStatusCode());
+
+       final Address body1 = response1.getBody();
+       if(body1 == null) {
+           fail("Body is null");
+       }
+
+       AtomicReference<Integer> amountRecords = new AtomicReference<>(0);
+       addressRepository.findAll()
+               .forEach(place -> amountRecords .getAndSet(amountRecords .get() + 1));
+       assertEquals(1, amountRecords.get());
+
+       ResponseEntity<Address> response2 =
+               testRestTemplate.getForEntity("http://localhost:" +
+                       this.port + "/geocoder/reverse?lat=10.5&lon=11", Address.class);
+       assertEquals(HttpStatus.OK, response2.getStatusCode());
+
+       final Address body2 = response2.getBody();
+       if(body2 == null) {
+           fail("Body is null");
+       }
+       assertEquals(body1, body2);
+
+       AtomicReference<Integer> amountRecords2 = new AtomicReference<>(0);
+       addressRepository.findAll()
+               .forEach(place -> amountRecords2 .getAndSet(amountRecords2 .get() + 1));
+       assertEquals(1, amountRecords2.get());
+   }
+
+   @Test
+   void reverseWhenBadQueryParams() {
+       final String query = null;
+       when(nominatimClient.reverse(anyString(), anyString())).thenReturn(Optional.empty());
+       ResponseEntity<Address> response =
+               testRestTemplate.getForEntity("http://localhost:" +
+                       this.port + "/geocoder/reverse?lat=a&lon=b", Address.class);
+       assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+       assertNull(response.getBody());
    }
 
    private static NominatimPlace buildTestPlace() {

@@ -16,6 +16,6 @@ public record NominatimPlace(
         @JsonProperty("display_name") String displayName,
         @JsonProperty("type") String type) {
     public NominatimPlace() {
-        this(0.0, 0.0, "", "");
+        this(45.044_427_1, 39.028_404_322_949_385, "Стадион 'Краснодар'", "");
     }
 }

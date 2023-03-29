@@ -18,6 +18,7 @@ import java.util.Optional;
  * @author Bogdan Lesin
  */
 @FeignClient(value = "nominatim", url = "https://nominatim.openstreetmap.org/")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public interface NominatimClient {
     String JSON_FORMAT = "json";
 
@@ -47,6 +48,10 @@ public interface NominatimClient {
 
     default Optional<NominatimPlace> reverse(final String latitude, final String longitude) {
         try {
+            final NominatimPlace place = reverse(latitude, longitude, JSON_FORMAT);
+            if (place.latitude() == null) {
+                throw new Exception("No place");
+            }
             return Optional.of(reverse(latitude, longitude, JSON_FORMAT));
         } catch (Exception ex) {
             return Optional.empty();
