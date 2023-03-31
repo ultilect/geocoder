@@ -33,8 +33,6 @@ public class AddressService {
     }
 
     public Optional<Address> reverse(final Double latitude, final Double longitude) {
-           //final Double lat = Double.parseDouble(latitude);
-           //final double lon = Double.parseDouble(longitude);
            return addressRepository
                    .findByLatitudeAndLongitude(latitude, longitude)
                    .or(() -> nominatimClient.reverse(latitude.toString(), longitude.toString())
