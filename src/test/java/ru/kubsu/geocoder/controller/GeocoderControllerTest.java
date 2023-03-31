@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.kubsu.geocoder.client.NominatimClient;
 import ru.kubsu.geocoder.dto.NominatimPlace;
+import ru.kubsu.geocoder.dto.RestApiError;
 import ru.kubsu.geocoder.model.Address;
 import ru.kubsu.geocoder.repository.AddressRepository;
 import ru.kubsu.geocoder.repository.TestRepository;
@@ -172,14 +173,33 @@ class GeocoderControllerTest {
    }
 
    @Test
+   void reverseWhenLonIsNull() {
+        ResponseEntity<RestApiError> response = testRestTemplate.getForEntity("http://localhost:" +
+                this.port + "/geocoder/reverse?lat=a", RestApiError.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        RestApiError body = response.getBody();
+        if(body == null) {
+            fail("Body is null");
+        }
+        assertEquals("/geocoder/reverse", body.path());
+        assertEquals("Bad Request", body.error());
+        assertEquals(400, body.status());
+   }
+
+   @Test
    void reverseWhenBadQueryParams() {
        final String query = null;
        when(nominatimClient.reverse(anyString(), anyString())).thenReturn(Optional.empty());
-       ResponseEntity<Address> response =
+       ResponseEntity<RestApiError> response =
                testRestTemplate.getForEntity("http://localhost:" +
-                       this.port + "/geocoder/reverse?lat=a&lon=b", Address.class);
-       assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-       assertNull(response.getBody());
+                       this.port + "/geocoder/reverse?lat=a&lon=b", RestApiError.class);
+       assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+       final RestApiError body = response.getBody();
+       assertNotNull(body);
+       assertEquals(400, body.status());
+       assertEquals("/geocoder/reverse", body.path());
+       assertEquals("Bad Request", body.error());
    }
 
    private static NominatimPlace buildTestPlace() {

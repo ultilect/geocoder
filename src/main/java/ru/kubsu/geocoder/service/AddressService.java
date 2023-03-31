@@ -32,21 +32,17 @@ public class AddressService {
                 );
     }
 
-    public Optional<Address> reverse(final String latitude, final String longitude) {
-        try {
-            final Double lat = Double.parseDouble(latitude);
-            final double lon = Double.parseDouble(longitude);
+    public Optional<Address> reverse(final Double latitude, final Double longitude) {
+           //final Double lat = Double.parseDouble(latitude);
+           //final double lon = Double.parseDouble(longitude);
            return addressRepository
-                   .findByLatitudeAndLongitude(lat, lon)
-                   .or(() -> nominatimClient.reverse(latitude, longitude)
+                   .findByLatitudeAndLongitude(latitude, longitude)
+                   .or(() -> nominatimClient.reverse(latitude.toString(), longitude.toString())
                            //может быть найдено место, которое уже есть в таблице
                            .map(place -> addressRepository
                                    .findByLatitudeAndLongitude(place.latitude(), place.longitude())
                                    .orElseGet(() -> addressRepository.save(Address.of(place, QUERY_FOR_REVERSE)))
                            )
                    );
-        } catch (Exception ex) {
-            return Optional.empty();
-        }
     }
 }

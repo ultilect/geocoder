@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.kubsu.geocoder.dto.RestApiError;
 import ru.kubsu.geocoder.model.Address;
 import ru.kubsu.geocoder.service.AddressService;
 
@@ -33,10 +34,18 @@ public class GeocoderController {
     }
 
     @GetMapping(value = "/reverse", produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<Address> reverse(final @RequestParam("lat") String latitude,
+    public ResponseEntity<?> reverse(final @RequestParam("lat") String latitude,
                                                   final @RequestParam("lon") String longitude) {
-        return addressService.reverse(latitude, longitude)
-                .map(place -> ResponseEntity.status(HttpStatus.OK).body(place))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        try {
+            final Double lat = Double.parseDouble(latitude);
+            final Double lon = Double.parseDouble(longitude);
+            return addressService.reverse(lat, lon)
+                    .map(place -> ResponseEntity.status(HttpStatus.OK).body(place))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception ex) {
+            final RestApiError error = new RestApiError(400, "Bad Request", "/geocoder/reverse");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
     }
 }
