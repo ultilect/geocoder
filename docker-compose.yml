@@ -21,6 +21,8 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.http.middlewares.my-auth.basicauth.users=admin:$$2y$$10$$As9s5uNt3nRzJhAlfJXmreCGodzKcPL4nJmsaz3QBU4.cUrTHEvdS'
     networks:
       - overlay
 
@@ -33,6 +35,7 @@ services:
       - 'traefik.http.routers.search-coder.entrypoints=http'
       - 'traefik.http.routers.search-coder.rule=PathPrefix(`/geocoder/search`)'
       - 'traefik.http.services.search-coder.loadbalancer.healthCheck.path=/health'
+      - 'traefik.http.routers.search-coder.middlewares=my-auth@docker'
     ports:
       - '8080'
     networks:
@@ -47,6 +50,7 @@ services:
       - 'traefik.http.routers.reverse-geocoder.entrypoints=http'
       - 'traefik.http.routers.reverse-geocoder.rule=PathPrefix(`/geocoder/reverse`)'
       - 'traefik.http.services.reverse-geocoder.loadbalancer.healthCheck.path=/health'
+      - 'traefik.http.routers.reverse-geocoder.middlewares=my-auth@docker'
     ports:
       - '8080'
     networks:
