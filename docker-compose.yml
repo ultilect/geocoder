@@ -7,15 +7,50 @@ volumes:
   pg_data:
 
 services:
-  application:
-    image: geocoder:latest
-    container_name: geocoder
-    restart: unless-stopped
+
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.11
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker --entrypoints.http.address=:80
     ports:
-      - '80:8080'
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - overlay
 
+  search-geocoder:
+    image: geocoder:0.0.2
+    container_name: search-geocoder
+    restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.search-coder.entrypoints=http'
+      - 'traefik.http.routers.search-coder.rule=PathPrefix(`/geocoder/search`)'
+      - 'traefik.http.services.search-coder.loadbalancer.healthCheck.path=/health'
+    ports:
+      - '8080'
+    networks:
+      - overlay
+
+  reverse-geocoder:
+    image: geocoder:0.0.2
+    container_name: reverse-geocoder
+    restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.reverse-geocoder.entrypoints=http'
+      - 'traefik.http.routers.reverse-geocoder.rule=PathPrefix(`/geocoder/reverse`)'
+      - 'traefik.http.services.reverse-geocoder.loadbalancer.healthCheck.path=/health'
+    ports:
+      - '8080'
+    networks:
+      - overlay
   database:
     image: postgres:15
     container_name: geocoder-postgres
@@ -25,7 +60,7 @@ services:
       - POSTGRES_USER=geocoder
       - POSTGRES_PASSWORD=geocoder
     ports:
-      - '5432:5432'
+      - '5432'
     networks:
       - overlay
     volumes:
@@ -39,6 +74,6 @@ services:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
     ports:
-      - '15432:80'
+      - '80'
     networks:
       - overlay
