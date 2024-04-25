@@ -12,7 +12,7 @@ services:
     # The official v2 Traefik docker image
     image: traefik:v2.11
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker --entrypoints.http.address=:80
+    command: --api.insecure=true  --providers.file.directory=/etc/traefik/config
     ports:
       # The HTTP port
       - "80:80"
@@ -21,8 +21,7 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - 'traefik.http.middlewares.my-auth.basicauth.users=admin:$$2y$$10$$As9s5uNt3nRzJhAlfJXmreCGodzKcPL4nJmsaz3QBU4.cUrTHEvdS'
+      - ./traefik/config/:/etc/traefik/config
     networks:
       - overlay
 
@@ -30,12 +29,6 @@ services:
     image: geocoder:0.0.2
     container_name: search-geocoder
     restart: unless-stopped
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.search-coder.entrypoints=http'
-      - 'traefik.http.routers.search-coder.rule=PathPrefix(`/geocoder/search`)'
-      - 'traefik.http.services.search-coder.loadbalancer.healthCheck.path=/health'
-      - 'traefik.http.routers.search-coder.middlewares=my-auth@docker'
     ports:
       - '8080'
     networks:
@@ -45,12 +38,6 @@ services:
     image: geocoder:0.0.2
     container_name: reverse-geocoder
     restart: unless-stopped
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.reverse-geocoder.entrypoints=http'
-      - 'traefik.http.routers.reverse-geocoder.rule=PathPrefix(`/geocoder/reverse`)'
-      - 'traefik.http.services.reverse-geocoder.loadbalancer.healthCheck.path=/health'
-      - 'traefik.http.routers.reverse-geocoder.middlewares=my-auth@docker'
     ports:
       - '8080'
     networks:

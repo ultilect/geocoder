@@ -1,0 +1,37 @@
+http:
+  middlewares:
+    my-auth:
+      basicauth:
+        users:
+          - "admin:$2y$10$As9s5uNt3nRzJhAlfJXmreCGodzKcPL4nJmsaz3QBU4.cUrTHEvdS"
+  routers:
+    search-coder:
+      entrypoints: http
+      rule: PathPrefix(`/geocoder/search`)
+      service: "search-geocoder"
+      middlewares:
+        - "my-auth"
+
+    reverse-coder:
+      entrypoints: http
+      rule: PathPrefix(`/geocoder/reverse`)
+      service: "reverse-geocoder"
+      middlewares:
+        - "my-auth"
+  services:
+    search-geocoder:
+      loadBalancer:
+        healthCheck:
+          path: /health
+          interval: "1m"
+          timeout: "3s"
+        servers:
+          - url: "http://search-geocoder:8080"
+    reverse-geocoder:
+      loadBalancer:
+        healthCheck:
+          path: /health
+          interval: "1m"
+          timeout: "3s"
+        servers:
+          - url: "http://reverse-geocoder:8080"

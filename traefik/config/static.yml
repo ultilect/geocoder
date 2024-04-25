@@ -1,0 +1,8 @@
+entryPoints:
+  http:
+    address: 80
+providers:
+  docker:
+    endpoint: /var/run/docker.sock
+  file:
+    directory: /etc/traefik/config/dynamic/conf.yml
